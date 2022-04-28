@@ -5,6 +5,7 @@ import RegisterFrame
 
 class LoginDialog(wx.Dialog):
 
+
     def __init__(self):
         wx.Dialog.__init__(self, None, title="Login")
         self.logged = False
@@ -14,7 +15,7 @@ class LoginDialog(wx.Dialog):
         user_sizer.Add(user, 0, wx.ALL | wx.CENTER, 5)
         self.user = wx.TextCtrl(self, style=wx.TE_PROCESS_ENTER)
         self.user.Bind(wx.EVT_TEXT_ENTER, self.onLogin)
-        user_sizer.Add(self.user, 0, wx.ALL)
+        user_sizer.Add(self.user, 0, wx.CENTER)
 
         pass_sizer = wx.BoxSizer(wx.HORIZONTAL)
 
@@ -25,8 +26,8 @@ class LoginDialog(wx.Dialog):
         pass_sizer.Add(self.password, 0, wx.ALL, 5)
 
         main_sizer = wx.BoxSizer(wx.VERTICAL)
-        main_sizer.Add(user_sizer, 0, wx.ALL, 5)
-        main_sizer.Add(pass_sizer, 0, wx.ALL, 5)
+        main_sizer.Add(user_sizer, 0, wx.CENTER, 5)
+        main_sizer.Add(pass_sizer, 0, wx.CENTER, 5)
 
         btnLogin = wx.Button(self, label="Login")
         btnLogin.Bind(wx.EVT_BUTTON, self.onLogin)
@@ -45,6 +46,7 @@ class LoginDialog(wx.Dialog):
         if sqlAlch.checkUser(user_name, user_password):
             self.logged_in = True
             self.username = user_name
+            LoginDialog.loggedUser = self.username
             self.Close()
 
         else:

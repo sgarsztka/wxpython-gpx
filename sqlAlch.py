@@ -68,3 +68,26 @@ def checkUser(name,password):
             print("Sql exception")
     else:
         return False
+
+
+
+def getTrackDates(user):
+    engine = create_engine("sqlite:///sqlDb.db", echo=True)
+    metadata = MetaData()
+    gpxTracksTable = Table('gpxTracks', metadata, autoload=True, autoload_with=engine)
+    query = select(gpxTracksTable.c.date).where(gpxTracksTable.columns.user == user)
+    results = engine.execute(query)
+    dates = results.fetchall()
+    dates = [row._asdict() for row in dates]
+    return dates
+
+
+def getTracks(user):
+    engine = create_engine("sqlite:///sqlDb.db", echo=True)
+    metadata = MetaData()
+    gpxTracksTable = Table('gpxTracks', metadata, autoload=True, autoload_with=engine)
+    query = select([gpxTracksTable]).where(gpxTracksTable.columns.user == user)
+    results = engine.execute(query)
+    tracks = results.fetchall()
+    tracks = [row._asdict() for row in tracks]
+    return tracks
