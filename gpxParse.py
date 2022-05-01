@@ -28,8 +28,6 @@ class GpxRecord:
         print('DEBUG:' + filePath)
         gpx_file = open(filePath, 'r')
         gpx_parsed_file = gpxpy.parse(gpx_file)
-
-
         i = 0
         for track in gpx_parsed_file.tracks:
             for segment in track.segments:
@@ -43,8 +41,7 @@ class GpxRecord:
                     self.pointsArray[-1].append(point.longitude)
                     self.elevationArray.append(float(point.elevation)/100)
                     self.hrArray.append(float(point.description))
-
-                    i=i+1
+                    i = i+1
         #DEBUG:
         # print(len(self.pointsArray))
         # print(len(self.elevationArray))

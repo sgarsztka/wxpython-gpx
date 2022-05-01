@@ -1,6 +1,6 @@
 from sqlalchemy import create_engine,inspect, select
 from sqlalchemy import Column, Table, Integer, String, MetaData, REAL, DATETIME
-
+from sqlalchemy import and_
 
 
 
@@ -34,7 +34,7 @@ def createDb():
 
 
 def insertUser(name,password):
-    engine = create_engine("sqlite:///sqlDb.db",echo=True)
+    engine = create_engine("sqlite:///sqlDb.db",echo=False)
     metadata = MetaData()
     userstable = Table('users', metadata, autoload=True, autoload_with=engine)
     userIns = userstable.insert().values(name = name, password=password)
@@ -43,7 +43,7 @@ def insertUser(name,password):
 
 
 def insertGpxTrack(username,avgSpeed,distance,avgHr,date,rideTime,points,hr,elevation):
-    engine = create_engine("sqlite:///sqlDb.db", echo=True)
+    engine = create_engine("sqlite:///sqlDb.db", echo=False)
     metadata = MetaData()
     gpxTracksTable = Table('gpxTracks', metadata, autoload=True, autoload_with=engine)
     trackInsert = gpxTracksTable.insert().values(user=username,
@@ -54,7 +54,7 @@ def insertGpxTrack(username,avgSpeed,distance,avgHr,date,rideTime,points,hr,elev
 
 
 def checkUser(name,password):
-    engine = create_engine("sqlite:///sqlDb.db", echo=True)
+    engine = create_engine("sqlite:///sqlDb.db", echo=False)
     metadata = MetaData()
     userstable = Table('users', metadata, autoload=True, autoload_with=engine)
     query = select([userstable]).where(userstable.columns.name == name)
@@ -72,7 +72,7 @@ def checkUser(name,password):
 
 
 def getTrackDates(user):
-    engine = create_engine("sqlite:///sqlDb.db", echo=True)
+    engine = create_engine("sqlite:///sqlDb.db", echo=False)
     metadata = MetaData()
     gpxTracksTable = Table('gpxTracks', metadata, autoload=True, autoload_with=engine)
     query = select(gpxTracksTable.c.date).where(gpxTracksTable.columns.user == user)
@@ -83,7 +83,7 @@ def getTrackDates(user):
 
 
 def getTracks(user):
-    engine = create_engine("sqlite:///sqlDb.db", echo=True)
+    engine = create_engine("sqlite:///sqlDb.db", echo=False)
     metadata = MetaData()
     gpxTracksTable = Table('gpxTracks', metadata, autoload=True, autoload_with=engine)
     query = select([gpxTracksTable]).where(gpxTracksTable.columns.user == user)
@@ -91,3 +91,16 @@ def getTracks(user):
     tracks = results.fetchall()
     tracks = [row._asdict() for row in tracks]
     return tracks
+
+
+def getSelectedTrack(user, trackDate):
+    engine = create_engine("sqlite:///sqlDb.db", echo=False)
+    metadata = MetaData()
+    gpxTracksTable = Table('gpxTracks', metadata, autoload=True, autoload_with=engine)
+    query = select([gpxTracksTable]).where( and_ (gpxTracksTable.columns.user == user) ,
+                                            (gpxTracksTable.columns.date == trackDate ))
+    results = engine.execute(query)
+    selectedTrack = results.fetchall()
+    selectedTrack = [row._asdict() for row in selectedTrack]
+    print("sql" , trackDate)
+    return selectedTrack

@@ -7,6 +7,8 @@ import wx.html
 import pathlib2
 import os
 from datetime import datetime
+import sys
+import MapMaker as map
 
 class MyBrowser(wx.Frame):
     loggedUser = ""
@@ -40,22 +42,20 @@ class MyBrowser(wx.Frame):
         vbox.Add(self.toolbar1, 0, wx.EXPAND)
         self.Bind(wx.EVT_TOOL, self.quit, tQuit)
         self.Bind(wx.EVT_TOOL, self.gpxLoad, tLoad)
+        self.Bind(wx.EVT_CLOSE, self.quit)
 
         datesListTemp = self.getUserTracksDates()
         dateList = []
         for index in range(len(datesListTemp)):
             for key in datesListTemp[index]:
-                print(datesListTemp[index][key])
-                dateList.append(datesListTemp[index][key].strftime("%m/%d/%Y, %H:%M:%S"))
+                dateList.append(datesListTemp[index][key].strftime("%Y-%m-%d %H:%M:%S"))
 
-        tracksList = self.getUserTracks()
-        # print(tracksList)
+        # tracksList = self.getUserTracks()
 
         self.lst = wx.ListBox(self, size=(150, -1), choices=dateList, style=wx.LB_SINGLE)
         hbox.Add(self.lst, 0, wx.ALIGN_LEFT | wx.EXPAND, 10)
         hbox.Add(self.browser, 1, wx.EXPAND, 10)
-        self.lst.Bind(wx.EVT_LISTBOX, self.getUserTracks)
-
+        self.lst.Bind(wx.EVT_LISTBOX, self.getUserPoints, self.lst)
         # self.SetSizer(vbox)
         self.SetSizer(hbox)
         self.SetTitle('GPX')
@@ -66,6 +66,7 @@ class MyBrowser(wx.Frame):
     def quit(self, e):
         # self.Close()
         self.Destroy()
+        sys.exit(0)
 
 
     def gpxLoad(self, e):
@@ -73,7 +74,6 @@ class MyBrowser(wx.Frame):
             openFileDialog = wx.FileDialog(self, "Open", "", "",
                                            "GPX Files (*.gpx)|*.gpx",
                                            wx.FD_OPEN | wx.FD_FILE_MUST_EXIST)
-
             openFileDialog.ShowModal()
             print(openFileDialog.GetPath())
             gpxPath = openFileDialog.GetPath()
@@ -84,19 +84,60 @@ class MyBrowser(wx.Frame):
                                    gpxObject.serializedPointsArray, gpxObject.serializedHrArray,
                                    gpxObject.serializedElevationArray)
             openFileDialog.Destroy()
-
-        except:
+            self.updateUserTracksDates()
+        except Exception as e:
             wx.MessageBox("File not added!", "Message", wx.OK | wx.ICON_ERROR)
+            print(e)
             pass
 
     def getUserTracksDates(self):
         return sqlAlch.getTrackDates(MyBrowser.loggedUser)
 
-    def getUserTracks(self):
-        print('event!')
+    def updateUserTracksDates(self):
+        datesListTemp = self.getUserTracksDates()
+        dateList = []
+        for index in range(len(datesListTemp)):
+            for key in datesListTemp[index]:
+                dateList.append(datesListTemp[index][key].strftime("%Y-%m-%d %H:%M:%S"))
+        self.lst.Clear()
+        self.lst.AppendItems(dateList)
 
+
+    def getUserTracks(self):
         return sqlAlch.getTracks(MyBrowser.loggedUser)
 
+    def getSelectedTrack(self, trackDate):
+        return sqlAlch.getSelectedTrack(MyBrowser.loggedUser, trackDate)
+
+    def getUserPoints(self, event):
+        print("event")
+        positionSelected = self.lst.GetStringSelection()
+        a_object = datetime.strptime(positionSelected, '%Y-%m-%d %H:%M:%S')
+
+        gpxPointsListTemp = self.getSelectedTrack(a_object)
+        gpxPointsList = []
+        for index in range(len(gpxPointsListTemp)):
+            for key in gpxPointsListTemp[index]:
+                gpxPointsList.append(gpxPointsListTemp[index][key])
+        print(len(gpxPointsList[7]))
+        xtemp = gpxPointsList[7]
+        xtemp = xtemp.translate({ord('['): None}).translate({ord(']'): None})
+        splittedList= xtemp.split(",")
+        latPointsList = []
+        lonPointsList = []
+        for i in range(0, len(splittedList)):
+            if i % 2:
+                lonPointsList.append(splittedList[i])
+            else:
+                latPointsList.append(splittedList[i])
+        print(latPointsList)
+        print(lonPointsList)
+        formPointsList = []
+        formPointsList = [(latPointsList[i], lonPointsList[i]) for i in range(0, len(latPointsList))]
+        print(formPointsList[3])
+        map.updateMap(formPointsList)
+        absPath = os.getcwd()
+        self.browser.LoadURL(pathlib2.Path(absPath + "/" + "maparea.html").as_uri())
 
 def main():
     app = wx.App(False)
