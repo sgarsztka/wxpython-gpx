@@ -27,6 +27,7 @@ class MyBrowser(wx.Frame):
         vbox = wx.BoxSizer(wx.VERTICAL)
         hbox = wx.BoxSizer(wx.HORIZONTAL)
 
+
         absPath = os.getcwd()
         a = pathlib2.Path(absPath + "/" + "maparea.html").as_uri()
         usedBackend = wx.html2.WebViewBackendIE
@@ -53,11 +54,16 @@ class MyBrowser(wx.Frame):
         # tracksList = self.getUserTracks()
 
         self.lst = wx.ListBox(self, size=(150, -1), choices=dateList, style=wx.LB_SINGLE)
+        self.sb = wx.StaticBox(self, label='placeholder')
+
         hbox.Add(self.lst, 0, wx.ALIGN_LEFT | wx.EXPAND, 10)
         hbox.Add(self.browser, 1, wx.EXPAND, 10)
+        vbox.Add(self.sb, 1,  wx.BOTTOM | wx.ALIGN_CENTER_HORIZONTAL, 10)
         self.lst.Bind(wx.EVT_LISTBOX, self.getUserPoints, self.lst)
-        # self.SetSizer(vbox)
+
+        self.SetSizer(vbox)
         self.SetSizer(hbox)
+
         self.SetTitle('GPX')
         self.Center()
         self.SetSize((1280, 720))
@@ -132,7 +138,6 @@ class MyBrowser(wx.Frame):
                 latPointsList.append(splittedList[i])
         print(latPointsList)
         print(lonPointsList)
-        formPointsList = []
         formPointsList = [(latPointsList[i], lonPointsList[i]) for i in range(0, len(latPointsList))]
         print(formPointsList[3])
         map.updateMap(formPointsList)

@@ -69,7 +69,21 @@ def checkUser(name,password):
     else:
         return False
 
-
+def checkCreatedUser(name):
+    engine = create_engine("sqlite:///sqlDb.db", echo=False)
+    metadata = MetaData()
+    userstable = Table('users', metadata, autoload=True, autoload_with=engine)
+    query = select([userstable]).where(userstable.columns.name == name)
+    results = engine.execute(query)
+    user = results.fetchall()
+    if user:
+        try:
+            if name == user[0][1]:
+                return True
+        except:
+            print("Sql exception")
+    else:
+        return False
 
 def getTrackDates(user):
     engine = create_engine("sqlite:///sqlDb.db", echo=False)

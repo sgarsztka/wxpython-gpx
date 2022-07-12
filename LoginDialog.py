@@ -5,43 +5,53 @@ import RegisterFrame
 
 class LoginDialog(wx.Dialog):
 
-
     def __init__(self):
-        wx.Dialog.__init__(self, None, title="Login")
-        self.logged = False
-        self.username = None
-        user_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        user = wx.StaticText(self, label="User")
-        user_sizer.Add(user, 0, wx.ALL | wx.CENTER, 5)
-        self.user = wx.TextCtrl(self, style=wx.TE_PROCESS_ENTER)
-        self.user.Bind(wx.EVT_TEXT_ENTER, self.onLogin)
-        user_sizer.Add(self.user, 0, wx.CENTER)
+        wx.Dialog.__init__(self, None, id=wx.ID_ANY, title="GPX", pos=wx.DefaultPosition,
+                           size=wx.Size(279, 284), style=wx.DEFAULT_DIALOG_STYLE)
 
-        pass_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.SetSizeHintsSz(wx.DefaultSize, wx.DefaultSize)
 
-        pass_lbl = wx.StaticText(self, label="Password:")
-        pass_sizer.Add(pass_lbl, 0, wx.ALL | wx.CENTER, 5)
-        self.password = wx.TextCtrl(self, style=wx.TE_PASSWORD | wx.TE_PROCESS_ENTER)
-        self.password.Bind(wx.EVT_TEXT_ENTER, self.onLogin)
-        pass_sizer.Add(self.password, 0, wx.ALL, 5)
+        bSizer1 = wx.BoxSizer(wx.VERTICAL)
 
-        main_sizer = wx.BoxSizer(wx.VERTICAL)
-        main_sizer.Add(user_sizer, 0, wx.CENTER, 5)
-        main_sizer.Add(pass_sizer, 0, wx.CENTER, 5)
+        self.login = wx.TextCtrl(self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0)
+        bSizer1.Add(self.login, 0, wx.ALL | wx.ALIGN_CENTER_HORIZONTAL, 5)
 
-        btnLogin = wx.Button(self, label="Login")
-        btnLogin.Bind(wx.EVT_BUTTON, self.onLogin)
-        main_sizer.Add(btnLogin, 0, wx.ALL | wx.LEFT, 5)
+        self.m_staticText1 = wx.StaticText(self, wx.ID_ANY, u"Login", wx.DefaultPosition, wx.DefaultSize, 0)
+        self.m_staticText1.Wrap(-1)
+        bSizer1.Add(self.m_staticText1, 0, wx.ALL | wx.ALIGN_CENTER_HORIZONTAL, 5)
 
-        btnRegister = wx.Button(self, label="Register")
-        btnRegister.Bind(wx.EVT_BUTTON, self.onRegister)
-        main_sizer.Add(btnRegister, 0, wx.ALL | wx.RIGHT, 5)
+        self.password = wx.TextCtrl(self, wx.ID_ANY, style=wx.TE_PASSWORD )
+        bSizer1.Add(self.password, 0, wx.ALL | wx.ALIGN_CENTER_HORIZONTAL, 5)
 
-        self.SetSizer(main_sizer)
+        self.m_staticText2 = wx.StaticText(self, wx.ID_ANY, u"Password", wx.DefaultPosition, wx.DefaultSize, 0)
+        self.m_staticText2.Wrap(-1)
+        bSizer1.Add(self.m_staticText2, 0, wx.ALL | wx.ALIGN_CENTER_HORIZONTAL, 5)
+
+        gSizer1 = wx.GridSizer(0, 2, 0, 0)
+
+        self.btnLogin = wx.Button(self, wx.ID_ANY, u"Login", wx.DefaultPosition, wx.DefaultSize, 0)
+        gSizer1.Add(self.btnLogin, 0, wx.ALL | wx.ALIGN_CENTER_HORIZONTAL | wx.ALIGN_CENTER_VERTICAL, 5)
+
+        self.btnRegister = wx.Button(self, wx.ID_ANY, u"Register", wx.DefaultPosition, wx.DefaultSize, 0)
+        gSizer1.Add(self.btnRegister, 0, wx.ALL | wx.ALIGN_CENTER_HORIZONTAL | wx.ALIGN_CENTER_VERTICAL, 5)
+
+        bSizer1.Add(gSizer1, 1, wx.EXPAND, 5)
+
+        self.SetSizer(bSizer1)
+        self.Layout()
+
+        self.Centre(wx.BOTH)
+
+        # Connect Events
+        self.btnLogin.Bind(wx.EVT_BUTTON, self.onLogin)
+        self.btnRegister.Bind(wx.EVT_BUTTON, self.onRegister)
+
+    def __del__(self):
+        pass
 
     def onLogin(self, event):
         user_password = self.password.GetValue()
-        user_name = self.user.GetValue()
+        user_name = self.login.GetValue()
 
         if sqlAlch.checkUser(user_name, user_password):
             self.logged_in = True
@@ -55,4 +65,3 @@ class LoginDialog(wx.Dialog):
     def onRegister(self, event):
         regDialog = RegisterFrame.RegisterFrame()
         regDialog.ShowModal()
-
