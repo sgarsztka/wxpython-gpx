@@ -13,10 +13,7 @@ import MapMaker as map
 
 class MyBrowser(wx.Frame):
     loggedUser = ""
-    # dateOfRide = ""
-    avgHr = ""
-    avgSpeed = ""
-    distance = ""
+
     def __init__(self, *args, **kwargs):
         super(MyBrowser, self).__init__(*args, **kwargs)
         dlg = LoginDialog.LoginDialog()
