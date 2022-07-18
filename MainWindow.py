@@ -9,7 +9,42 @@ import os
 from datetime import datetime
 import sys
 import MapMaker as map
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigureCanvas
+import matplotlib.pyplot as plt
 
+
+
+
+class MatplotPanel(wx.Panel):
+    def __init__(self, parent):
+        plt.rcParams["figure.figsize"] = [3, 2]
+        plt.rcParams["figure.autolayout"] = True
+        plt.rcParams["ytick.labelright"]= False
+        plt.rcParams["ytick.labelleft"] = False
+        plt.rcParams["ytick.left"] = False
+
+        wx.Panel.__init__(self, parent)
+        self.figure = Figure()
+        self.axes = self.figure.add_subplot(111)
+        self.axes.axes.get_xaxis().set_visible(False)
+        self.canvas = FigureCanvas(self, -1, self.figure)
+        self.sizer = wx.BoxSizer(wx.VERTICAL)
+        self.sizer.Add(self.canvas, 1, wx.LEFT | wx.TOP | wx.GROW)
+        self.SetSizer(self.sizer)
+        self.Fit()
+
+    def draw(self,x,y):
+        self.figure.clear()
+        self.figure = Figure()
+        self.axes = self.figure.add_subplot(111)
+        self.axes.axes.get_xaxis().set_visible(False)
+        self.canvas = FigureCanvas(self, -1, self.figure)
+        self.sizer = wx.BoxSizer(wx.VERTICAL)
+        self.sizer.Add(self.canvas, 1, wx.LEFT | wx.TOP | wx.GROW)
+        self.SetSizer(self.sizer)
+        self.Fit()
+        self.axes.plot(x, y)
 
 class MyBrowser(wx.Frame):
     loggedUser = ""
@@ -25,9 +60,11 @@ class MyBrowser(wx.Frame):
             self.Close()
         self.initUI()
 
+
     def initUI(self):
         vbox = wx.BoxSizer(wx.VERTICAL)
         hbox = wx.BoxSizer(wx.HORIZONTAL)
+        self.elevationPanel = MatplotPanel(self)
 
 
         absPath = os.getcwd()
@@ -43,6 +80,7 @@ class MyBrowser(wx.Frame):
         tQuit = self.toolbar1.AddTool(wx.ID_ANY, 'Quit', wx.Bitmap('ico/cancel.png'))
         self.toolbar1.Realize()
         vbox.Add(self.toolbar1, 0, wx.EXPAND)
+
         self.Bind(wx.EVT_TOOL, self.quit, tQuit)
         self.Bind(wx.EVT_TOOL, self.gpxLoad, tLoad)
         self.Bind(wx.EVT_CLOSE, self.quit)
@@ -57,7 +95,7 @@ class MyBrowser(wx.Frame):
 
         self.lst = wx.ListBox(self, size=(150, -1), choices=dateList, style=wx.LB_SINGLE)
         self.box = wx.StaticBox( self, wx.ID_ANY, "GPX Track Data", size=(200, -1))
-
+        self.SetBackgroundColour(wx.WHITE)
         self.trackData = wx.StaticBoxSizer(self.box, wx.VERTICAL )
         self.dateSizer = wx.BoxSizer( wx.HORIZONTAL)
         self.dateLabel = wx.StaticText(self, -1, "Date:")
@@ -110,12 +148,16 @@ class MyBrowser(wx.Frame):
         hbox.Add(self.lst, 0, wx.ALIGN_LEFT | wx.EXPAND, 10)
         hbox.Add(self.browser, 1, wx.EXPAND, 10)
         hbox.Add(self.trackData, 0, wx.EXPAND, 10)
+
+
+
         self.trackData.Add(self.dateSizer, 0 ,wx.EXPAND, 10)
         self.trackData.Add(self.avgSpeedSizer, 0 ,wx.EXPAND, 10)
         self.trackData.Add(self.distanceSizer, 0, wx.EXPAND, 10)
         self.trackData.Add(self.hrSizer, 0, wx.EXPAND, 10)
         self.trackData.Add(self.rideTimeSizer, 0, wx.EXPAND, 10)
         self.trackData.Add(self.pointsNumberSizer, 0, wx.EXPAND, 10)
+        self.trackData.Add(self.elevationPanel, 0, wx.EXPAND, 10)
         self.lst.Bind(wx.EVT_LISTBOX, self.getUserPoints, self.lst)
 
 
@@ -179,7 +221,6 @@ class MyBrowser(wx.Frame):
         a_object = datetime.strptime(positionSelected, '%Y-%m-%d %H:%M:%S')
 
         gpxPointsListTemp = self.getSelectedTrack(a_object)
-        # print(gpxPointsListTemp)
         gpxPointsList = []
         for index in range(len(gpxPointsListTemp)):
             for key in gpxPointsListTemp[index]:
@@ -195,8 +236,7 @@ class MyBrowser(wx.Frame):
                 lonPointsList.append(splittedList[i])
             else:
                 latPointsList.append(splittedList[i])
-        # print(latPointsList)
-        # print(lonPointsList)
+
         formPointsList = [(latPointsList[i], lonPointsList[i]) for i in range(0, len(latPointsList))]
         print(gpxPointsList[2])
         map.updateMap(formPointsList)
@@ -208,6 +248,18 @@ class MyBrowser(wx.Frame):
         self.hrLabel2.SetLabel(str(gpxPointsList[4])[:5])
         self.rideTimeLabel2.SetLabel(str(gpxPointsList[6]))
         self.pointsNumberLabel2.SetLabel(str(len(gpxPointsList[7])))
+        pointList1 = gpxPointsList[9].replace("[","")
+        pointList = list(pointList1.split(","))
+        pointListSize = []
+        for i in range(0, (len(pointList))):
+            pointListSize.append(i)
+
+        self.elevationPanel.draw(pointListSize,pointList)
+
+
+
+
+
 
 def main():
     app = wx.App(False)
