@@ -65,7 +65,7 @@ class MyBrowser(wx.Frame):
         vbox = wx.BoxSizer(wx.VERTICAL)
         hbox = wx.BoxSizer(wx.HORIZONTAL)
         self.elevationPanel = MatplotPanel(self)
-
+        self.hrPanel = MatplotPanel(self)
 
         absPath = os.getcwd()
         a = pathlib2.Path(absPath + "/" + "maparea.html").as_uri()
@@ -158,6 +158,7 @@ class MyBrowser(wx.Frame):
         self.trackData.Add(self.rideTimeSizer, 0, wx.EXPAND, 10)
         self.trackData.Add(self.pointsNumberSizer, 0, wx.EXPAND, 10)
         self.trackData.Add(self.elevationPanel, 0, wx.EXPAND, 10)
+        self.trackData.Add(self.hrPanel, 0, wx.EXPAND, 10)
         self.lst.Bind(wx.EVT_LISTBOX, self.getUserPoints, self.lst)
 
 
@@ -238,7 +239,7 @@ class MyBrowser(wx.Frame):
                 latPointsList.append(splittedList[i])
 
         formPointsList = [(latPointsList[i], lonPointsList[i]) for i in range(0, len(latPointsList))]
-        print(gpxPointsList[2])
+        # print(gpxPointsList[2])
         map.updateMap(formPointsList)
         absPath = os.getcwd()
         self.browser.LoadURL(pathlib2.Path(absPath + "/" + "maparea.html").as_uri())
@@ -248,13 +249,21 @@ class MyBrowser(wx.Frame):
         self.hrLabel2.SetLabel(str(gpxPointsList[4])[:5])
         self.rideTimeLabel2.SetLabel(str(gpxPointsList[6]))
         self.pointsNumberLabel2.SetLabel(str(len(gpxPointsList[7])))
-        pointList1 = gpxPointsList[9].replace("[","")
-        pointList = list(pointList1.split(","))
-        pointListSize = []
-        for i in range(0, (len(pointList))):
-            pointListSize.append(i)
+        elevationTempList = gpxPointsList[9].replace("[","")
+        elevationList = list(elevationTempList.split(","))
+        elevationListSize = []
+        for i in range(0, (len(elevationList))):
+            elevationListSize.append(i)
 
-        self.elevationPanel.draw(pointListSize,pointList)
+        hrTempList = gpxPointsList[8].replace("[", "")
+        hrTempList.replace("0.0","")
+        hrList = list(hrTempList.split(","))
+        hrListSize = []
+        for i in range(0, (len(hrList))):
+            hrListSize.append(i)
+
+        self.elevationPanel.draw(elevationListSize,elevationList)
+        self.hrPanel.draw(hrListSize,hrList)
 
 
 
