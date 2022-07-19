@@ -160,7 +160,7 @@ class MyBrowser(wx.Frame):
         self.trackData.Add(self.elevationPanel, 0, wx.EXPAND, 10)
         self.trackData.Add(self.hrPanel, 0, wx.EXPAND, 10)
         self.lst.Bind(wx.EVT_LISTBOX, self.getUserPoints, self.lst)
-
+        self.lst.Bind(wx.EVT_RIGHT_DOWN, self.rightClickMenu, self.lst)
 
         self.SetSizer(vbox)
         self.SetSizer(hbox)
@@ -239,7 +239,6 @@ class MyBrowser(wx.Frame):
                 latPointsList.append(splittedList[i])
 
         formPointsList = [(latPointsList[i], lonPointsList[i]) for i in range(0, len(latPointsList))]
-        # print(gpxPointsList[2])
         map.updateMap(formPointsList)
         absPath = os.getcwd()
         self.browser.LoadURL(pathlib2.Path(absPath + "/" + "maparea.html").as_uri())
@@ -264,10 +263,20 @@ class MyBrowser(wx.Frame):
 
         self.elevationPanel.draw(elevationListSize,elevationList)
         self.hrPanel.draw(hrListSize,hrList)
+        trackId = gpxPointsList[0]
+        return trackId
 
+    def rightClickMenu(self, event):
+        self.popupID1 = wx.NewId()
+        self.Bind(wx.EVT_MENU, self.onPopup, id=self.popupID1)
+        menu = wx.Menu()
+        menu.Append(self.popupID1, "Delete")
+        self.PopupMenu(menu)
 
-
-
+    def onPopup(self, event):
+        trkId = self.getUserPoints(event)
+        sqlAlch.deleteSelectedTrack(trkId)
+        self.updateUserTracksDates()
 
 
 def main():

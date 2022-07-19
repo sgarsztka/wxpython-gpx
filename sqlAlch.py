@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine,inspect, select
 from sqlalchemy import Column, Table, Integer, String, MetaData, REAL, DATETIME
 from sqlalchemy import and_
-
+from sqlalchemy import delete
 
 
 def createDb():
@@ -118,3 +118,11 @@ def getSelectedTrack(user, trackDate):
     selectedTrack = [row._asdict() for row in selectedTrack]
     print("sql" , trackDate)
     return selectedTrack
+
+
+def deleteSelectedTrack(userId):
+    engine = create_engine("sqlite:///sqlDb.db", echo=False)
+    metadata = MetaData()
+    gpxTracksTable = Table('gpxTracks', metadata, autoload=True, autoload_with=engine)
+    query = delete(gpxTracksTable).where(gpxTracksTable.c.id==userId)
+    results = engine.execute(query)
